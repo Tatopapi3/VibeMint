@@ -19,6 +19,8 @@ TECHNICAL REQUIREMENTS:
 9. Mount with: ReactDOM.createRoot(document.getElementById('root')).render(<ErrorBoundary><App /></ErrorBoundary>);
 9. Use realistic placeholder/demo data — never leave lists empty or forms blank
 10. For charts and graphs: build them with pure CSS/Tailwind (div bars, progress bars, SVG inline) — never use canvas or external chart libraries
+11. Keep the total output under 350 lines — be concise, avoid repetition
+12. Never break a className string across multiple lines — keep every className on one single line
 
 DESIGN REQUIREMENTS:
 - Beautiful, modern, production-quality UI
