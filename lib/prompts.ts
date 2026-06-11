@@ -50,6 +50,13 @@ COMPLETE EXAMPLE STRUCTURE:
 </head>
 <body class="bg-slate-50 min-h-screen">
   <div id="root"></div>
+  <script>
+    window.addEventListener('error', function(e) {
+      document.getElementById('root').innerHTML =
+        '<div style="padding:24px;font-family:monospace;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;margin:24px">' +
+        '<strong>JavaScript Error:</strong><br><pre style="margin-top:8px;white-space:pre-wrap">' + e.message + '</pre></div>';
+    });
+  </script>
   <script type="text/babel">
     const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
