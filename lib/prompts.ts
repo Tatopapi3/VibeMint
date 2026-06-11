@@ -8,14 +8,15 @@ OUTPUT FORMAT RULES (CRITICAL):
 - End with </html> — no text after
 
 TECHNICAL REQUIREMENTS:
-1. React 18 via CDN: <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-2. ReactDOM via CDN: <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-3. Babel standalone for JSX: <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+1. React 18 via CDN: <script crossorigin="anonymous" src="https://unpkg.com/react@18/umd/react.development.js"></script>
+2. ReactDOM via CDN: <script crossorigin="anonymous" src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+3. Babel standalone for JSX: <script crossorigin="anonymous" src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 4. Tailwind CSS via CDN: <script src="https://cdn.tailwindcss.com"></script>
 5. ONLY use the 4 CDN scripts above — do NOT load Chart.js, D3, Lucide, or any other external library
 6. All React/JSX code must be in <script type="text/babel"> tags
 7. Destructure hooks at top: const { useState, useEffect, useCallback, useRef, useMemo } = React;
-8. Mount with: ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+8. Always include the ErrorBoundary class from the example structure above
+9. Mount with: ReactDOM.createRoot(document.getElementById('root')).render(<ErrorBoundary><App /></ErrorBoundary>);
 9. Use realistic placeholder/demo data — never leave lists empty or forms blank
 10. For charts and graphs: build them with pure CSS/Tailwind (div bars, progress bars, SVG inline) — never use canvas or external chart libraries
 
@@ -43,9 +44,9 @@ COMPLETE EXAMPLE STRUCTURE:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>App</title>
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script crossorigin="anonymous" src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin="anonymous" src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script crossorigin="anonymous" src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -54,11 +55,24 @@ COMPLETE EXAMPLE STRUCTURE:
     window.addEventListener('error', function(e) {
       document.getElementById('root').innerHTML =
         '<div style="padding:24px;font-family:monospace;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;margin:24px">' +
-        '<strong>JavaScript Error:</strong><br><pre style="margin-top:8px;white-space:pre-wrap">' + e.message + '</pre></div>';
+        '<strong>Error:</strong><br><pre style="margin-top:8px;white-space:pre-wrap">' + (e.message || e) + '</pre></div>';
     });
   </script>
   <script type="text/babel">
     const { useState, useEffect, useCallback, useRef, useMemo } = React;
+
+    class ErrorBoundary extends React.Component {
+      constructor(props) { super(props); this.state = { error: null }; }
+      static getDerivedStateFromError(e) { return { error: e }; }
+      render() {
+        if (this.state.error) return (
+          <div style={{padding:24,fontFamily:'monospace',color:'#dc2626',background:'#fef2f2',border:'1px solid #fca5a5',borderRadius:8,margin:24}}>
+            <strong>Render Error:</strong><pre style={{marginTop:8,whiteSpace:'pre-wrap'}}>{this.state.error.message}</pre>
+          </div>
+        );
+        return this.props.children;
+      }
+    }
 
     function App() {
       // Full implementation here with realistic data and working interactivity
@@ -69,7 +83,7 @@ COMPLETE EXAMPLE STRUCTURE:
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(<ErrorBoundary><App /></ErrorBoundary>);
   </script>
 </body>
 </html>`;
