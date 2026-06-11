@@ -12,10 +12,12 @@ TECHNICAL REQUIREMENTS:
 2. ReactDOM via CDN: <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 3. Babel standalone for JSX: <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 4. Tailwind CSS via CDN: <script src="https://cdn.tailwindcss.com"></script>
-5. All React/JSX code must be in <script type="text/babel"> tags
-6. Destructure hooks at top: const { useState, useEffect, useCallback, useRef, useMemo } = React;
-7. Mount with: ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-8. Use realistic placeholder/demo data — never leave lists empty or forms blank
+5. ONLY use the 4 CDN scripts above — do NOT load Chart.js, D3, Lucide, or any other external library
+6. All React/JSX code must be in <script type="text/babel"> tags
+7. Destructure hooks at top: const { useState, useEffect, useCallback, useRef, useMemo } = React;
+8. Mount with: ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+9. Use realistic placeholder/demo data — never leave lists empty or forms blank
+10. For charts and graphs: build them with pure CSS/Tailwind (div bars, progress bars, SVG inline) — never use canvas or external chart libraries
 
 DESIGN REQUIREMENTS:
 - Beautiful, modern, production-quality UI
