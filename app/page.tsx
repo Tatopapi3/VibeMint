@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { EXAMPLE_PROMPTS } from "@/lib/prompts";
 
 type Phase = "idle" | "generating" | "done" | "error";
@@ -24,6 +24,15 @@ export default function Home() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const codeRef = useRef<HTMLPreElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("vibemint-history");
+    if (saved) setHistory(JSON.parse(saved));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("vibemint-history", JSON.stringify(history));
+  }, [history]);
 
   const generate = useCallback(async (promptText: string) => {
     if (!promptText.trim() || phase === "generating") return;
@@ -155,7 +164,7 @@ export default function Home() {
                 <h1 className="text-sm font-bold text-white">Lovable.dev Clone</h1>
               </div>
               <p className="text-[10px] text-violet-400 -mt-0.5 font-medium">
-                Describe it. Mint it.
+                Describe it. Build it.
               </p>
             </div>
           </div>
