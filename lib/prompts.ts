@@ -38,6 +38,9 @@ FUNCTIONALITY REQUIREMENTS:
 - Handle empty states gracefully
 - Form submissions should show confirmation feedback
 - If it's a list/todo/kanban: support add, delete, and status changes
+- Every <button> that is NOT submitting a form MUST have type="button" to prevent accidental form submission
+- Every <form> MUST have an onSubmit handler that calls e.preventDefault() before doing anything else
+- Never rely on default form submission behavior — always handle it explicitly in React
 
 COMPLETE EXAMPLE STRUCTURE:
 <!DOCTYPE html>

@@ -396,7 +396,7 @@ export default function Home() {
                   isDone ? (
                     <iframe
                       srcDoc={generatedCode}
-                      sandbox="allow-scripts allow-same-origin"
+                      sandbox="allow-scripts allow-same-origin allow-forms"
                       className="w-full h-full border-0 bg-white"
                       title="Generated App Preview"
                     />
