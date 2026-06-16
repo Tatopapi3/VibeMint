@@ -2,10 +2,6 @@
 
 Describe any app in plain English — watch it appear in seconds.
 
-**Live demo:** https://lovable-dev-clone-three.vercel.app
-
-**GitHub:** https://github.com/Tatopapi3/VibeMint
-
 ---
 
 ## What it does
