@@ -161,7 +161,7 @@ export default function Home() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm font-bold text-white">Lovable.dev Clone</h1>
+                <h1 className="text-sm font-bold text-white">VibeMint</h1>
               </div>
               <p className="text-[10px] text-violet-400 -mt-0.5 font-medium">
                 Describe it. Build it.

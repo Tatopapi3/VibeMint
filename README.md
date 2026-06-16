@@ -1,10 +1,10 @@
-# Lovable.dev Clone
+# VibeMint
 
-A Lovable.dev-inspired app generator built with Next.js and Claude AI. Describe any app in plain English — watch it appear in seconds.
+Describe any app in plain English — watch it appear in seconds.
 
 **Live demo:** https://lovable-dev-clone-three.vercel.app
 
-**GitHub:** https://github.com/Tatopapi3/lovable-dev-clone
+**GitHub:** https://github.com/Tatopapi3/VibeMint
 
 ---
 
@@ -32,8 +32,8 @@ Type a description of any web app. The AI streams back a complete, working singl
 ## Getting started
 
 ```bash
-git clone https://github.com/Tatopapi3/lovable-dev-clone
-cd lovable-dev-clone
+git clone https://github.com/Tatopapi3/VibeMint
+cd VibeMint
 npm install
 cp .env.local.example .env.local
 # Add your ANTHROPIC_API_KEY to .env.local
