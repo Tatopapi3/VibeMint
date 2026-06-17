@@ -237,7 +237,11 @@ export default function Home() {
       {/* ── Header ── */}
       <header className="flex-shrink-0 border-b border-white/10 px-5 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleNewApp}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-sm">
               ✨
             </div>
@@ -249,7 +253,7 @@ export default function Home() {
                 Describe it. Build it.
               </p>
             </div>
-          </div>
+          </button>
         </div>
 
         <div className="flex items-center gap-3">
