@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { EXAMPLE_PROMPTS } from "@/lib/prompts";
+import LearningPanel from "@/components/LearningPanel";
 
 type Phase = "idle" | "generating" | "done" | "error";
 type Tab = "preview" | "code";
@@ -21,6 +22,7 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tokenCount, setTokenCount] = useState(0);
+  const [showLearningPanel, setShowLearningPanel] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const codeRef = useRef<HTMLPreElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -89,6 +91,7 @@ export default function Home() {
 
       setPhase("done");
       setActiveTab("preview");
+      setTimeout(() => setShowLearningPanel(true), 800);
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
         setPhase("idle");
@@ -142,6 +145,7 @@ export default function Home() {
     setGeneratedCode("");
     setPrompt("");
     setError(null);
+    setShowLearningPanel(false);
     setTimeout(() => textareaRef.current?.focus(), 100);
   }
 
@@ -410,7 +414,6 @@ export default function Home() {
                       title="Generated App Preview"
                     />
                   ) : (
-                    /* Streaming: show code building up in preview tab too */
                     <div className="w-full h-full flex items-center justify-center bg-slate-900/50">
                       <div className="text-center">
                         <div className="w-12 h-12 rounded-2xl bg-violet-500/20 flex items-center justify-center text-2xl mx-auto mb-4 animate-pulse">
@@ -422,7 +425,6 @@ export default function Home() {
                     </div>
                   )
                 ) : (
-                  /* Code tab */
                   <pre
                     ref={codeRef}
                     className="w-full h-full overflow-auto p-5 text-[11px] text-slate-300 font-mono leading-relaxed bg-slate-950 m-0"
@@ -465,6 +467,14 @@ export default function Home() {
           )}
         </main>
       </div>
+
+      {showLearningPanel && (
+        <LearningPanel
+          code={generatedCode}
+          prompt={prompt}
+          onClose={() => setShowLearningPanel(false)}
+        />
+      )}
     </div>
   );
 }
