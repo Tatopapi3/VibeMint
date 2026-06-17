@@ -1,8 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { SYSTEM_PROMPT } from "@/lib/prompts";
 
-export const runtime = "edge";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const { prompt } = await request.json();

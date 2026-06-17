@@ -13,14 +13,17 @@ TECHNICAL REQUIREMENTS:
 3. Babel standalone for JSX: <script crossorigin="anonymous" src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 4. Tailwind CSS via CDN: <script src="https://cdn.tailwindcss.com"></script>
 5. ONLY use the 4 CDN scripts above — do NOT load Chart.js, D3, Lucide, or any other external library
-6. All React/JSX code must be in <script type="text/babel"> tags
-7. Destructure hooks at top: const { useState, useEffect, useCallback, useRef, useMemo } = React;
-8. Always include the ErrorBoundary class from the example structure above
-9. Mount with: ReactDOM.createRoot(document.getElementById('root')).render(<ErrorBoundary><App /></ErrorBoundary>);
-10. Use realistic placeholder/demo data — never leave lists empty or forms blank
-11. For charts and graphs: build them with pure CSS/Tailwind (div bars, progress bars, SVG inline) — never use canvas or external chart libraries
-12. Keep the total output under 350 lines — be concise, avoid repetition
-13. Never break a className string across multiple lines — keep every className on one single line
+6. All React/JSX code must be in <script type="text/babel"> tags — NEVER use <script type="module"> or plain <script> for React code
+7. NEVER use import or export statements anywhere — Babel standalone does not support ES modules
+8. NEVER output pre-transpiled or bundler-compiled code — do NOT use _jsx, _jsxs, _typeof, _interopRequireDefault or any Babel/webpack helper functions
+9. NEVER use react/jsx-runtime — JSX is handled automatically by Babel standalone inside <script type="text/babel">
+10. Destructure hooks at top: const { useState, useEffect, useCallback, useRef, useMemo } = React;
+11. Always include the ErrorBoundary class from the example structure above
+12. Mount with: ReactDOM.createRoot(document.getElementById('root')).render(<ErrorBoundary><App /></ErrorBoundary>);
+13. Use realistic placeholder/demo data — never leave lists empty or forms blank
+14. For charts and graphs: build them with pure CSS/Tailwind (div bars, progress bars, SVG inline) — never use canvas or external chart libraries
+15. Keep the total output under 350 lines — be concise, avoid repetition
+16. Never break a className string across multiple lines — keep every className on one single line
 
 DESIGN REQUIREMENTS:
 - Beautiful, modern, production-quality UI

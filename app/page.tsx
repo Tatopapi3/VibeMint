@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { EXAMPLE_PROMPTS } from "@/lib/prompts";
 import LearningPanel from "@/components/LearningPanel";
 
@@ -13,6 +13,14 @@ interface HistoryEntry {
   code: string;
 }
 
+const PRD_QUESTIONS = [
+  { question: "What problem are you trying to solve?", example: "e.g. Jewelry stores struggle to track consignment inventory" },
+  { question: "Who experiences this problem?", example: "e.g. Jewelry store managers" },
+  { question: "What is frustrating, slow, expensive or difficult about the current process?", example: "e.g. Having to go back and look through previous records slows operations" },
+  { question: "If this problem were solved, what would be different?", example: "e.g. Store managers will have updated records on every vendor on the spot" },
+  { question: "What is the smallest thing we could build that proves the idea works?", example: "e.g. Show each vendor and detail records of the inventory at hand and return records" },
+];
+
 export default function Home() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [prompt, setPrompt] = useState("");
@@ -22,8 +30,12 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tokenCount, setTokenCount] = useState(0);
+  const [prdStep, setPrdStep] = useState(0);
+  const [prdAnswers, setPrdAnswers] = useState<string[]>([]);
+  const [prdInput, setPrdInput] = useState("");
   const [showLearningPanel, setShowLearningPanel] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const prdInputRef = useRef<HTMLTextAreaElement>(null);
   const codeRef = useRef<HTMLPreElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -35,6 +47,13 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem("vibemint-history", JSON.stringify(history));
   }, [history]);
+
+  useEffect(() => {
+    if (phase === "idle") {
+      const t = setTimeout(() => prdInputRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    }
+  }, [prdStep, phase]);
 
   const generate = useCallback(async (promptText: string) => {
     if (!promptText.trim() || phase === "generating") return;
@@ -103,11 +122,71 @@ export default function Home() {
     }
   }, [phase]);
 
+  function compilePRD(answers: string[]): string {
+    return `Build a working web app for this use case:\n\nProblem: ${answers[0]}\nUsers: ${answers[1]}\nPain points: ${answers[2]}\nDesired outcome: ${answers[3]}\nMVP scope: ${answers[4]}\n\nCreate a functional demo with realistic sample data that directly addresses this use case.`;
+  }
+
+  function handlePrdKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey && prdInput.trim()) {
+      e.preventDefault();
+      const newAnswers = [...prdAnswers, prdInput.trim()];
+      setPrdAnswers(newAnswers);
+      setPrdInput("");
+      if (prdStep < 4) {
+        setPrdStep(prdStep + 1);
+      } else {
+        const prd = compilePRD(newAnswers);
+        setPrompt(prd);
+        generate(prd);
+      }
+    }
+  }
+
+  const sanitizedCode = useMemo(() => {
+    if (!generatedCode) return "";
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(generatedCode, "text/html");
+
+      // Convert module scripts to babel scripts
+      doc.querySelectorAll('script[type="module"]').forEach((s) => {
+        s.setAttribute("type", "text/babel");
+      });
+
+      // Strip import/export from all inline scripts
+      doc.querySelectorAll("script:not([src])").forEach((s) => {
+        let code = s.textContent ?? "";
+        if (!code.includes("import ") && !code.includes("export ")) return;
+        code = code.replace(/import\s+[\s\S]*?from\s+['"][^'"]+['"]\s*;?/g, "");
+        code = code.replace(/import\s+['"][^'"]+['"]\s*;?/g, "");
+        code = code.replace(/^\s*export\s+(?=const|let|var|function|class)/gm, "");
+        code = code.replace(/^\s*export\s+(?:default\s+\S+|\{[^}]*\})\s*;?\s*$/gm, "");
+        s.textContent = code;
+      });
+
+      // Change type="text/babel" → type="text/jsx" so Babel's auto-processor
+      // ignores them, then inject our own runner that calls Babel.transform
+      // explicitly with sourceType:'script' — preventing any module detection.
+      const babelScripts = Array.from(doc.querySelectorAll('script[type="text/babel"]'));
+      babelScripts.forEach((s) => s.setAttribute("type", "text/jsx"));
+
+      if (babelScripts.length > 0) {
+        const runner = doc.createElement("script");
+        runner.textContent = `document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('script[type="text/jsx"]').forEach(function(el){if(typeof Babel==='undefined')return;try{var out=Babel.transform(el.textContent,{presets:[['react',{runtime:'classic'}],'env'],sourceType:'script'});var s=document.createElement('script');s.textContent=out.code;document.body.appendChild(s);}catch(e){var r=document.getElementById('root');if(r)r.innerHTML='<div style="padding:24px;font-family:monospace;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px"><strong>Error:</strong><pre style="margin-top:8px;white-space:pre-wrap">'+e.message+'</pre></div>';}});});`;
+        doc.body.appendChild(runner);
+      }
+
+      return "<!DOCTYPE html>" + doc.documentElement.outerHTML;
+    } catch {
+      return generatedCode;
+    }
+  }, [generatedCode]);
+
   function handleStop() {
     abortControllerRef.current?.abort();
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault();
     generate(prompt);
   }
@@ -145,8 +224,11 @@ export default function Home() {
     setGeneratedCode("");
     setPrompt("");
     setError(null);
+    setPrdStep(0);
+    setPrdAnswers([]);
+    setPrdInput("");
     setShowLearningPanel(false);
-    setTimeout(() => textareaRef.current?.focus(), 100);
+    setTimeout(() => prdInputRef.current?.focus(), 100);
   }
 
   const isGenerating = phase === "generating";
@@ -159,7 +241,11 @@ export default function Home() {
       {/* ── Header ── */}
       <header className="flex-shrink-0 border-b border-white/10 px-5 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleNewApp}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-sm">
               ✨
             </div>
@@ -171,7 +257,7 @@ export default function Home() {
                 Describe it. Build it.
               </p>
             </div>
-          </div>
+          </button>
         </div>
 
         <div className="flex items-center gap-3">
@@ -305,27 +391,64 @@ export default function Home() {
         {/* ── Main content ── */}
         <main className="flex-1 flex flex-col overflow-hidden">
           {isIdle ? (
-            /* ── Empty state ── */
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-600/20 border border-violet-500/20 flex items-center justify-center text-4xl mb-6">
-                ✨
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-3">
-                Describe any app. Watch it appear.
-              </h2>
-              <p className="text-slate-400 max-w-sm text-sm leading-relaxed mb-8">
-                Type what you want to build in plain English — a todo list, a dashboard, a booking form. VibeMint turns it into a real, working web app in seconds.
-              </p>
-              <div className="flex flex-wrap justify-center gap-2 max-w-md">
-                {EXAMPLE_PROMPTS.map((ex) => (
-                  <button
-                    key={ex.label}
-                    onClick={() => handleExampleClick(ex)}
-                    className="text-xs font-medium text-violet-300 border border-violet-500/30 hover:border-violet-400/60 bg-violet-500/10 hover:bg-violet-500/20 px-3 py-1.5 rounded-full transition-all"
-                  >
-                    {ex.label}
-                  </button>
-                ))}
+            /* ── PRD Builder ── */
+            <div className="flex-1 flex flex-col items-center justify-center p-8 overflow-y-auto">
+              <div className="w-full max-w-xl">
+                {/* Header */}
+                <div className="text-center mb-8">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-600/20 border border-violet-500/20 flex items-center justify-center text-2xl mx-auto mb-4">
+                    ✨
+                  </div>
+                  <h2 className="text-xl font-bold text-white">Let's define what you want to build</h2>
+                  <p className="text-slate-500 text-sm mt-1">Answer a few questions and VibeMint will build it for you</p>
+                </div>
+
+                {/* Progress */}
+                <div className="flex items-center justify-center gap-2 mb-8">
+                  {PRD_QUESTIONS.map((_, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-full transition-all ${
+                        i < prdStep ? "w-2 h-2 bg-violet-400" :
+                        i === prdStep ? "w-3 h-3 bg-violet-500" :
+                        "w-2 h-2 bg-slate-700"
+                      }`}
+                    />
+                  ))}
+                  <span className="text-[11px] text-slate-500 ml-2">Question {prdStep + 1} of 5</span>
+                </div>
+
+                {/* Completed answers */}
+                {prdAnswers.length > 0 && (
+                  <div className="space-y-2 mb-6">
+                    {prdAnswers.map((answer, i) => (
+                      <div key={i} className="flex gap-3 bg-slate-900/50 border border-white/5 rounded-xl px-4 py-3">
+                        <span className="text-violet-400 text-sm flex-shrink-0 mt-0.5">✓</span>
+                        <div className="min-w-0">
+                          <p className="text-[10px] text-slate-500 uppercase tracking-wide font-medium">{PRD_QUESTIONS[i].question}</p>
+                          <p className="text-sm text-slate-300 mt-0.5">{answer}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Current question */}
+                <div className="bg-slate-900/50 border border-violet-500/20 rounded-2xl p-5">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-violet-400 mb-1">Question {prdStep + 1} of 5</p>
+                  <h3 className="text-base font-semibold text-white mb-1">{PRD_QUESTIONS[prdStep].question}</h3>
+                  <p className="text-xs text-slate-500 mb-4">{PRD_QUESTIONS[prdStep].example}</p>
+                  <textarea
+                    ref={prdInputRef}
+                    value={prdInput}
+                    onChange={(e) => setPrdInput(e.target.value)}
+                    onKeyDown={handlePrdKeyDown}
+                    placeholder="Type your answer…"
+                    className="w-full bg-slate-950 border border-white/10 rounded-xl px-3.5 py-3 text-sm text-white placeholder-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all leading-relaxed"
+                    rows={2}
+                  />
+                  <p className="text-[10px] text-slate-600 mt-2">Press Enter to continue · Shift+Enter for new line</p>
+                </div>
               </div>
             </div>
           ) : isError ? (
@@ -408,7 +531,7 @@ export default function Home() {
                 {activeTab === "preview" ? (
                   isDone ? (
                     <iframe
-                      srcDoc={generatedCode}
+                      srcDoc={sanitizedCode}
                       sandbox="allow-scripts allow-same-origin allow-forms"
                       className="w-full h-full border-0 bg-white"
                       title="Generated App Preview"
