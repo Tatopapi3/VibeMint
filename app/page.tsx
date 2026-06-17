@@ -309,20 +309,9 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-white mb-3">
                 Describe any app. Watch it appear.
               </h2>
-              <p className="text-slate-400 max-w-sm text-sm leading-relaxed mb-8">
+              <p className="text-slate-400 max-w-sm text-sm leading-relaxed">
                 Type what you want to build in plain English — a todo list, a dashboard, a booking form. VibeMint turns it into a real, working web app in seconds.
               </p>
-              <div className="flex flex-wrap justify-center gap-2 max-w-md">
-                {EXAMPLE_PROMPTS.map((ex) => (
-                  <button
-                    key={ex.label}
-                    onClick={() => handleExampleClick(ex)}
-                    className="text-xs font-medium text-violet-300 border border-violet-500/30 hover:border-violet-400/60 bg-violet-500/10 hover:bg-violet-500/20 px-3 py-1.5 rounded-full transition-all"
-                  >
-                    {ex.label}
-                  </button>
-                ))}
-              </div>
             </div>
           ) : isError ? (
             /* ── Error state ── */
