@@ -34,7 +34,6 @@ export default function Home() {
   const [prdInput, setPrdInput] = useState("");
   const [showLearningPanel, setShowLearningPanel] = useState(false);
   const [isDark, setIsDark] = useState(true);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const prdInputRef = useRef<HTMLTextAreaElement>(null);
   const codeRef = useRef<HTMLPreElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -176,7 +175,6 @@ export default function Home() {
   }, [generatedCode]);
 
   function handleStop() { abortControllerRef.current?.abort(); }
-  function handleSubmit(e: { preventDefault(): void }) { e.preventDefault(); generate(prompt); }
   function handleExampleClick(ex: { label: string; prompt: string }) { setPrompt(ex.prompt); generate(ex.prompt); }
   function handleHistoryClick(entry: HistoryEntry) { setPrompt(entry.prompt); setGeneratedCode(entry.code); setPhase("done"); setActiveTab("preview"); }
   async function handleCopy() { await navigator.clipboard.writeText(generatedCode); setCopied(true); setTimeout(() => setCopied(false), 2000); }
@@ -260,69 +258,7 @@ export default function Home() {
       <div className="flex flex-1 overflow-hidden">
         {/* ── Left sidebar ── */}
         <aside className="w-72 flex-shrink-0 border-r border-slate-200 dark:border-white/10 flex flex-col overflow-hidden bg-white dark:bg-slate-950">
-          {/* Prompt form */}
-          <form onSubmit={handleSubmit} className="p-4 border-b border-slate-200 dark:border-white/10 space-y-3">
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-500">
-              What do you want to build?
-            </label>
-            <textarea
-              ref={textareaRef}
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                  e.preventDefault();
-                  generate(prompt);
-                }
-              }}
-              placeholder="Describe your app in plain English…"
-              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 resize-none focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all leading-relaxed"
-              rows={4}
-              disabled={isGenerating}
-            />
-            <button
-              type="submit"
-              disabled={!prompt.trim() || isGenerating}
-              className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-violet-900/30"
-            >
-              {isGenerating ? (
-                <>
-                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Generating…
-                </>
-              ) : (
-                <>Generate App ✨</>
-              )}
-            </button>
-            {!isGenerating && (
-              <p className="text-[10px] text-slate-500 dark:text-slate-600 text-center">⌘ + Enter to generate</p>
-            )}
-            {isGenerating && (
-              <button
-                type="button"
-                onClick={handleStop}
-                className="w-full text-xs font-bold py-2 rounded-xl border border-red-400/60 dark:border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
-              >
-                ■ Stop generating
-              </button>
-            )}
-            {isGenerating && (
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-[10px] text-slate-500">
-                  <span>Generating…</span>
-                  <span>~{tokenCount} tokens</span>
-                </div>
-                <div className="w-full h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full animate-pulse w-3/4" />
-                </div>
-              </div>
-            )}
-          </form>
-
-          {/* Scrollable area for examples + history */}
+          {/* Examples + history */}
           <div className="flex-1 overflow-y-auto p-4 space-y-5">
             <div className="space-y-2">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-500">
