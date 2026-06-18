@@ -17,7 +17,6 @@ const PRD_QUESTIONS = [
   { question: "What problem are you trying to solve?", example: "e.g. Jewelry stores struggle to track consignment inventory" },
   { question: "Who experiences this problem?", example: "e.g. Jewelry store managers" },
   { question: "What is frustrating, slow, expensive or difficult about the current process?", example: "e.g. Having to go back and look through previous records slows operations" },
-  { question: "If this problem were solved, what would be different?", example: "e.g. Store managers will have updated records on every vendor on the spot" },
   { question: "What is the smallest thing we could build that proves the idea works?", example: "e.g. Show each vendor and detail records of the inventory at hand and return records" },
 ];
 
@@ -125,7 +124,7 @@ export default function Home() {
   }, [phase]);
 
   function compilePRD(answers: string[]): string {
-    return `Build a working web app for this use case:\n\nProblem: ${answers[0]}\nUsers: ${answers[1]}\nPain points: ${answers[2]}\nDesired outcome: ${answers[3]}\nMVP scope: ${answers[4]}\n\nCreate a functional demo with realistic sample data that directly addresses this use case.`;
+    return `Build a working web app for this use case:\n\nProblem: ${answers[0]}\nUsers: ${answers[1]}\nPain points: ${answers[2]}\nMVP scope: ${answers[3]}\n\nCreate a functional demo with realistic sample data that directly addresses this use case.`;
   }
 
   function handlePrdKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -134,7 +133,7 @@ export default function Home() {
       const newAnswers = [...prdAnswers, prdInput.trim()];
       setPrdAnswers(newAnswers);
       setPrdInput("");
-      if (prdStep < 4) {
+      if (prdStep < 3) {
         setPrdStep(prdStep + 1);
       } else {
         const prd = compilePRD(newAnswers);
@@ -396,7 +395,7 @@ export default function Home() {
                       }`}
                     />
                   ))}
-                  <span className="text-[11px] text-slate-500 ml-2">Question {prdStep + 1} of 5</span>
+                  <span className="text-[11px] text-slate-500 ml-2">Question {prdStep + 1} of 4</span>
                 </div>
 
                 {prdAnswers.length > 0 && (
@@ -414,7 +413,7 @@ export default function Home() {
                 )}
 
                 <div className="bg-slate-50 dark:bg-slate-900/50 border border-violet-300/60 dark:border-violet-500/20 rounded-2xl p-5">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-violet-700 dark:text-violet-400 mb-1">Question {prdStep + 1} of 5</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-violet-700 dark:text-violet-400 mb-1">Question {prdStep + 1} of 4</p>
                   <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">{PRD_QUESTIONS[prdStep].question}</h3>
                   <p className="text-xs text-slate-600 dark:text-slate-500 mb-4">{PRD_QUESTIONS[prdStep].example}</p>
                   <textarea
