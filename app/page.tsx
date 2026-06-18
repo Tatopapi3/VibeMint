@@ -35,6 +35,7 @@ export default function Home() {
   const [prdInput, setPrdInput] = useState("");
   const [isDark, setIsDark] = useState(true);
   const [showLearningPanel, setShowLearningPanel] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const prdInputRef = useRef<HTMLTextAreaElement>(null);
   const codeRef = useRef<HTMLPreElement>(null);
